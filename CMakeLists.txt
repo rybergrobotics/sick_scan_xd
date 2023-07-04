@@ -348,20 +348,22 @@ if(${BUILD_WITH_SCANSEGMENT_XD_SUPPORT} OR BUILD_WITH_SCANSEGMENT_XD_SUPPORT EQU
     message(STATUS "Building ${PROJECT_NAME} with SCANSEGMENT_XD support")
     add_compile_options(-DSCANSEGMENT_XD_SUPPORT=1)
     # msgpack11
-    if(WIN32 OR ROS_VERSION EQUAL 0)
+    if(EXISTS "${PROJECT_SOURCE_DIR}/../msgpack11/msgpack11.hpp")
         set(MSGPACK11_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/../msgpack11")
-    else()
+        set(MSGPACK11_SOURCES "${PROJECT_SOURCE_DIR}/../msgpack11/msgpack11.cpp")
+    elseif(ROS_VERSION GREATER 0)
         set(MSGPACK11_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/../msgpack11/include")
-    endif()
-    if(WIN32)
-        set(MSGPACK11_LIBRARIES "msgpack11.lib")
-        link_libraries(${MSGPACK11_LIBRARIES})
-        link_directories("${PROJECT_BINARY_DIR}/msgpack11/$<CONFIGURATION>;${PROJECT_BINARY_DIR}/../msgpack11/$<CONFIGURATION>")
-    else()
-        set(MSGPACK11_LIBRARIES "libmsgpack11.a")
-        link_directories("${PROJECT_BINARY_DIR}/../msgpack11")
+        if(WIN32)
+            set(MSGPACK11_LIBRARIES "msgpack11.lib")
+            link_libraries(${MSGPACK11_LIBRARIES})
+            link_directories("${PROJECT_BINARY_DIR}/msgpack11/$<CONFIGURATION>;${PROJECT_BINARY_DIR}/../msgpack11/$<CONFIGURATION>")
+        else()
+            set(MSGPACK11_LIBRARIES "libmsgpack11.a")
+            link_directories("${PROJECT_BINARY_DIR}/../msgpack11")
+        endif()
     endif()
     include_directories(${MSGPACK11_INCLUDE_DIR})
+    message(STATUS "Building ${PROJECT_NAME} with MSGPACK11_INCLUDE_DIR=${MSGPACK11_INCLUDE_DIR} , MSGPACK11_SOURCES=${MSGPACK11_SOURCES} , MSGPACK11_LIBRARIES=${MSGPACK11_LIBRARIES}")
     # sick_scansegment_xd sources
     file(GLOB SCANSEGMENT_XD_SOURCES driver/src/sick_scansegment_xd/*.cpp)
 else()
@@ -525,6 +527,7 @@ if(ROS_VERSION EQUAL 1)
         roswrap/src/launchparser/launchparser.cpp
         ${LDMRS_SOURCES}
         ${SCANSEGMENT_XD_SOURCES}
+        ${MSGPACK11_SOURCES}
         ${SRC_WIN_FILES}
     )
     add_library(${PROJECT_NAME}_lib STATIC ${SICK_SCAN_LIB_SRC})
@@ -627,6 +630,7 @@ else() # i.e. (ROS_VERSION EQUAL 0 OR ROS_VERSION EQUAL 2)
         roswrap/src/toojpeg/toojpeg.cpp
         ${LDMRS_SOURCES}
         ${SCANSEGMENT_XD_SOURCES}
+        ${MSGPACK11_SOURCES}
         ${SRC_ROSSIMU_FILES}
         ${SRC_WIN_FILES}
     )
