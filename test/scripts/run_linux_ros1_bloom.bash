@@ -1,6 +1,7 @@
 #!/bin/bash
 
 printf "\033c"
+source /opt/ros/noetic/setup.bash
 rm -rf /tmp/prerelease_job
 mkdir -p /tmp/prerelease_job
 pushd /tmp/prerelease_job
